@@ -31,6 +31,20 @@ function post_type_creator_settings_page() {
             </table>
             <?php submit_button('Create Post Type'); ?>
         </form>
+        <h2>Existing Post Types</h2>
+        <ul>
+            <?php
+                $custom_post_types = get_option('post_type_creator_custom_post_types', []);
+            ?>
+            <?php foreach ($custom_post_types as $post_type): ?>
+                <li>
+                    <?php echo esc_html($post_type['display_name']); ?>
+                    <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=post-type-creator&delete_post_type=' . $post_type['machine_name']), 'delete_post_type'); ?>" style="color: red; text-decoration: none;">
+                        [Delete]
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
     </div>
     <?php
 }

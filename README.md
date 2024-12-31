@@ -1,4 +1,4 @@
-# Post Type Creator Plugin
+# Post Type Creator
 
 **Author:** [Rishabh Diwan](https://rishabhdiwan.netlify.app)  
 

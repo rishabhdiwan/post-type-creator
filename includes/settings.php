@@ -32,3 +32,32 @@ function post_type_creator_handle_form_submission() {
 if (is_admin() && isset($_POST['post_type_name'])) {
     add_action('admin_init', 'post_type_creator_handle_form_submission');
 }
+
+// Handle post type deletion
+function post_type_creator_handle_deletion() {
+    if (isset($_GET['delete_post_type']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'delete_post_type')) {
+        $post_type = sanitize_text_field($_GET['delete_post_type']);
+        $custom_post_types = get_option('post_type_creator_custom_post_types', []);
+
+        // Remove posts of the post type
+        $query = new WP_Query(['post_type' => $post_type, 'posts_per_page' => -1]);
+        while ($query->have_posts()) {
+            $query->the_post();
+            wp_delete_post(get_the_ID(), true);
+        }
+        wp_reset_postdata();
+
+        // Remove post type from options
+        $custom_post_types = array_filter($custom_post_types, function ($type) use ($post_type) {
+            return $type['machine_name'] !== $post_type;
+        });
+
+        update_option('post_type_creator_custom_post_types', $custom_post_types);
+
+        // Redirect to avoid repeated deletions on refresh
+        wp_redirect(admin_url('admin.php?page=post-type-creator'));
+        exit;
+    }
+}
+
+add_action('admin_init', 'post_type_creator_handle_deletion');
