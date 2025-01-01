@@ -61,3 +61,28 @@ function post_type_creator_handle_deletion() {
 }
 
 add_action('admin_init', 'post_type_creator_handle_deletion');
+
+// Handle Taxonomy creation
+function post_type_creator_handle_taxonomy_submission() {
+    if (isset($_POST['post_type_creator_taxonomy_nonce']) && wp_verify_nonce($_POST['post_type_creator_taxonomy_nonce'], 'post_type_creator_taxonomy_action')) {
+        $taxonomy_name = sanitize_text_field($_POST['taxonomy_name']);
+        $post_types = isset($_POST['post_types']) ? array_map('sanitize_text_field', $_POST['post_types']) : [];
+
+        if (empty($taxonomy_name) || empty($post_types)) {
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-error"><p>Please provide a taxonomy name and select at least one post type.</p></div>';
+            });
+            return;
+        }
+
+        // Save taxonomy to options
+        $custom_taxonomies = get_option('post_type_creator_custom_taxonomies', []);
+        $custom_taxonomies[$taxonomy_name] = $post_types;
+        update_option('post_type_creator_custom_taxonomies', $custom_taxonomies);
+
+        add_action('admin_notices', function () use ($taxonomy_name) {
+            echo '<div class="notice notice-success"><p>Taxonomy "' . esc_html($taxonomy_name) . '" created successfully.</p></div>';
+        });
+    }
+}
+add_action('admin_init', 'post_type_creator_handle_taxonomy_submission');

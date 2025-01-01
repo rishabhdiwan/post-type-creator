@@ -45,6 +45,34 @@ function post_type_creator_settings_page() {
                 </li>
             <?php endforeach; ?>
         </ul>
+        
+        <h2>Create Taxonomy</h2>
+        <form method="post" action="">
+            <?php wp_nonce_field('post_type_creator_taxonomy_action', 'post_type_creator_taxonomy_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><label for="taxonomy_name">Taxonomy Name</label></th>
+                    <td>
+                        <input name="taxonomy_name" id="taxonomy_name" type="text" class="regular-text" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="post_types">Assign to Post Types</label></th>
+                    <td>
+                        <?php
+                        if (!empty($custom_post_types)) {
+                            foreach ($custom_post_types as $post_type) {
+                                echo '<label><input type="checkbox" name="post_types[]" value="' . esc_attr($post_type['machine_name']) . '"> ' . esc_html($post_type['display_name']) . '</label><br>';
+                            }
+                        } else {
+                            echo '<p>No custom post types available. Create some first!</p>';
+                        }
+                        ?>
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button('Create Taxonomy'); ?>
+        </form>
     </div>
     <?php
 }
