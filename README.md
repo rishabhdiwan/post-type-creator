@@ -13,6 +13,7 @@ Post Type Creator is a WordPress plugin that helps in creating post types by jus
 ## Features
 
 - Dynamically created custom post types via an admin form that requires filling only one field.
+- Dynamically created Taxonomies with an option of absolute deletion from the Database.
 - Validated and sanitized input for security.
 - Viewable and manageable posts from custom post types directly in the WordPress dashboard.
 
