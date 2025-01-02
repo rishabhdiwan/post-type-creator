@@ -86,3 +86,36 @@ function post_type_creator_handle_taxonomy_submission() {
     }
 }
 add_action('admin_init', 'post_type_creator_handle_taxonomy_submission');
+
+// Handle Taxonomy Deletion
+function post_type_creator_handle_taxonomy_deletion() {
+    if (isset($_GET['delete_taxonomy']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'delete_taxonomy')) {
+        $taxonomy = sanitize_text_field($_GET['delete_taxonomy']);
+        global $wpdb;
+
+        // Delete terms associated with the taxonomy
+        $wpdb->delete($wpdb->term_taxonomy, ['taxonomy' => $taxonomy]);
+
+        // Clean up orphaned terms
+        $wpdb->query("DELETE t FROM {$wpdb->terms} t
+            LEFT JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
+            WHERE tt.term_id IS NULL");
+
+        // Remove the taxonomy from the options
+        $custom_taxonomies = get_option('post_type_creator_custom_taxonomies', []);
+        if (isset($custom_taxonomies[$taxonomy])) {
+            unset($custom_taxonomies[$taxonomy]);
+            update_option('post_type_creator_custom_taxonomies', $custom_taxonomies);
+        }
+
+        // Display a success notice
+        add_action('admin_notices', function () use ($taxonomy) {
+            echo '<div class="notice notice-success"><p>Taxonomy "' . esc_html($taxonomy) . '" and all its terms deleted from the database.</p></div>';
+        });
+
+        // Redirect to avoid repeated deletions on refresh
+        wp_redirect(admin_url('admin.php?page=post-type-creator'));
+        exit;
+    }
+}
+add_action('admin_init', 'post_type_creator_handle_taxonomy_deletion');
